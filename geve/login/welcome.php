@@ -5,6 +5,14 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
 }
+include 'db.php';
+
+// Extraer datos de la tabla vehiculos
+$sql_tipo1 = "SELECT * FROM vehiculos WHERE tipo_vehiculo = 1";
+$result_tipo1 = $conn->query($sql_tipo1);
+
+$sql_tipo2 = "SELECT * FROM vehiculos WHERE tipo_vehiculo = 2";
+$result_tipo2 = $conn->query($sql_tipo2);
 ?>
 
 <!DOCTYPE html>
@@ -76,6 +84,80 @@ if (!isset($_SESSION['username'])) {
             </table>
         </div>
    <br>
+   <div class="card">
+            <h2>Lista de Autos</h2>
+            <table id="autosTable" class="display">
+                <thead>
+                    <tr>
+                        
+                        <th>Nombre</th>
+                        <th>N° Chasis</th>
+                        <th>Patente</th>
+                        <th>Marca</th>
+                        <th>Tipo Vehículo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result_tipo1->num_rows > 0) {
+                        while($row = $result_tipo1->fetch_assoc()) {
+                            echo "<tr>
+
+                                <td>{$row['nombre']}</td>
+                                <td>{$row['n_chasis']}</td>
+                                <td>{$row['patente']}</td>
+                                <td>{$row['marca']}</td>
+                                <td>{$row['tipo_vehiculo']}</td>
+                                <td>
+                                <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
+                                <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
+                            </td>
+                                   </tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4'>No hay vehículos</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Lista de Maquinaria</h2>
+            <table id="autosTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>N° Chasis</th>
+                        <th>Patente</th>
+                        <th>Marca</th>
+                        <th>Tipo Vehículo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result_tipo2->num_rows > 0) {
+                        while($row = $result_tipo2->fetch_assoc()) {
+                            echo "<tr>
+                                <td>{$row['nombre']}</td>
+                                <td>{$row['n_chasis']}</td>
+                                <td>{$row['patente']}</td>
+                                <td>{$row['marca']}</td>
+                                <td>{$row['tipo_vehiculo']}</td>
+                                <td>
+                                <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
+                                <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
+                            </td>
+                               </tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='4'>No hay vehículos</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
    <br>
     <div class="card">
             <h2>Lista de Maquinaria</h2>
@@ -151,6 +233,26 @@ if (!isset($_SESSION['username'])) {
         // Abre el menú lateral al cargar la página
         openNav();
     });
+    function deleteVehicle(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este vehículo?")) {
+                $.ajax({
+                    url: 'eliminar_vehiculo.php',
+                    type: 'POST',
+                    data: { id_vehiculo: id },
+                    success: function(response) {
+                        if (response == 'success') {
+                            alert("Vehículo eliminado exitosamente");
+                            location.reload();
+                        } else {
+                            alert("Error al eliminar el vehículo");
+                        }
+                    }
+                });
+            }
+        }
+        function editVehicle(id) {
+            window.location.href = `editar_vehiculo.php?id=${id}`;
+        }
     </script>
 </body>
 </html>

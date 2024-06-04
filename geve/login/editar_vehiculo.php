@@ -1,7 +1,32 @@
+<?php
+include 'db.php';
+
+$id = $_GET['id'];
+$sql = "SELECT * FROM vehiculos WHERE id_vehiculo = $id";
+$result = $conn->query($sql);
+$vehicle = $result->fetch_assoc();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $n_chasis = $_POST['n_chasis'];
+    $patente = $_POST['patente'];
+    $marca = $_POST['marca'];
+    $tipo_vehiculo = $_POST['tipo_vehiculo'];
+
+    $sql = "UPDATE vehiculos SET n_chasis='$n_chasis', patente='$patente', marca='$marca', tipo_vehiculo='$tipo_vehiculo' WHERE id_vehiculo=$id";
+
+    if ($conn->query($sql) === TRUE) {
+        header("Location: welcome.php");
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agregar Vehículo</title>
+    <title>Editar Vehículo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,33 +67,37 @@
 </head>
 <body>
     <div class="container">
-        <h2>Agregar Vehículo</h2>
-        <form action="procesar_agregar_vehiculo.php" method="POST">
+        <h2>Editar Vehículo</h2>
+        <form action="editar_vehiculo.php?id=<?php echo $id; ?>" method="POST">
         <div class="form-group">
                 <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required>
+                <input type="text" id="nombre" name="nombre" value="<?php echo $vehicle['nombre']; ?>" required>
             </div>
             <div class="form-group">
                 <label for="n_chasis">N° Chasis:</label>
-                <input type="text" id="n_chasis" name="n_chasis" required>
+                <input type="text" id="n_chasis" name="n_chasis" value="<?php echo $vehicle['n_chasis']; ?>" required>
             </div>
             <div class="form-group">
                 <label for="patente">Patente:</label>
-                <input type="text" id="patente" name="patente" required>
+                <input type="text" id="patente" name="patente" value="<?php echo $vehicle['patente']; ?>" required>
             </div>
             <div class="form-group">
                 <label for="marca">Marca:</label>
-                <input type="text" id="marca" name="marca" required>
+                <input type="text" id="marca" name="marca" value="<?php echo $vehicle['marca']; ?>" required>
             </div>
             <div class="form-group">
                 <label for="tipo_vehiculo">Tipo Vehículo:</label>
                 <select id="tipo_vehiculo" name="tipo_vehiculo" required>
-                    <option value="1">Vehiculo</option>
-                    <option value="2">Maquinaria</option>
+                    <option value="1" <?php if ($vehicle['tipo_vehiculo'] == 1) echo 'selected'; ?>>Tipo 1</option>
+                    <option value="2" <?php if ($vehicle['tipo_vehiculo'] == 2) echo 'selected'; ?>>Tipo 2</option>
                 </select>
             </div>
-            <input type="submit" value="Agregar Vehículo">
+            <input type="submit" value="Guardar Cambios">
         </form>
     </div>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>
