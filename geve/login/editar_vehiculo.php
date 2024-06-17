@@ -1,30 +1,55 @@
 <?php
+session_start();
 include 'db.php';
 
-$id = $_GET['id'];
-$sql = "SELECT * FROM vehiculos WHERE id_vehiculo = $id";
-$result = $conn->query($sql);
-$vehicle = $result->fetch_assoc();
+
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['username'])) {
+    header("Location: index.php");
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $n_chasis = $_POST['n_chasis'];
-    $patente = $_POST['patente'];
-    $marca = $_POST['marca'];
-    $tipo_vehiculo = $_POST['tipo_vehiculo'];
+    $id_vehiculo = $_POST['id_vehiculo'];
+    $nombre = $_POST['nombre'];
+    $comprado = isset($_POST['comprado']) ? 1 : 0;
+    $fechaIngreso = $_POST['fechaIngreso'];
+    $identificador = $_POST['identificador'];
+    $observacion = $_POST['observacion'];
+    $vencimientoRevision = $_POST['vencimientoRevision'];
+    $vencimientoPermisoCirculacion = $_POST['vencimientoPermisoCirculacion'];
+    $obsCompra = $_POST['obsCompra'];
+    $ano = $_POST['ano'];
+    $numeroInterno = $_POST['numeroInterno'];
+    $nChasis = $_POST['nChasis'];
+    $nMotor = $_POST['nMotor'];
+    $nCarroceria = $_POST['nCarroceria'];
 
-    $sql = "UPDATE vehiculos SET n_chasis='$n_chasis', patente='$patente', marca='$marca', tipo_vehiculo='$tipo_vehiculo' WHERE id_vehiculo=$id";
+    $sql = "UPDATE Vehiculo SET nombre='$nombre', comprado='$comprado', fechaIngreso='$fechaIngreso', identificador='$identificador', observacion='$observacion', vencimientoRevision='$vencimientoRevision', vencimientoPermisoCirculacion='$vencimientoPermisoCirculacion', obsCompra='$obsCompra', ano='$ano', numeroInterno='$numeroInterno', nChasis='$nChasis', nMotor='$nMotor', nCarroceria='$nCarroceria' WHERE id_vehiculo='$id_vehiculo'";
 
     if ($conn->query($sql) === TRUE) {
+        // Registrar la acción en el historial
+        $usuario = $_SESSION['username'];
+        $sql_historial = "INSERT INTO historial (id_vehiculo,nombre_vehiculo, accion, usuario) VALUES ('$id_vehiculo','$nombre', 'editado', '$usuario')";
+        $conn->query($sql_historial);
+
         header("Location: welcome.php");
-        exit();
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
+
+    $conn->close();
+} else {
+    $id_vehiculo = $_GET['id'];
+    $sql = "SELECT * FROM Vehiculo WHERE id_vehiculo='$id_vehiculo'";
+    $result = $conn->query($sql);
+    $vehiculo = $result->fetch_assoc();
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <title>Editar Vehículo</title>
     <style>
@@ -66,38 +91,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Editar Vehículo</h2>
-        <form action="editar_vehiculo.php?id=<?php echo $id; ?>" method="POST">
-        <div class="form-group">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" value="<?php echo $vehicle['nombre']; ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="n_chasis">N° Chasis:</label>
-                <input type="text" id="n_chasis" name="n_chasis" value="<?php echo $vehicle['n_chasis']; ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="patente">Patente:</label>
-                <input type="text" id="patente" name="patente" value="<?php echo $vehicle['patente']; ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="marca">Marca:</label>
-                <input type="text" id="marca" name="marca" value="<?php echo $vehicle['marca']; ?>" required>
-            </div>
-            <div class="form-group">
-                <label for="tipo_vehiculo">Tipo Vehículo:</label>
-                <select id="tipo_vehiculo" name="tipo_vehiculo" required>
-                    <option value="1" <?php if ($vehicle['tipo_vehiculo'] == 1) echo 'selected'; ?>>Tipo 1</option>
-                    <option value="2" <?php if ($vehicle['tipo_vehiculo'] == 2) echo 'selected'; ?>>Tipo 2</option>
-                </select>
-            </div>
-            <input type="submit" value="Guardar Cambios">
-        </form>
+    <div class="container mt-5">
+        <div class="card">
+            <h5 class="card-header">Editar Vehículo</h5>
+            <div class="card-body">
+                <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                    <input type="hidden" name="id_vehiculo" value="<?php echo $vehiculo['id_vehiculo']; ?>">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" value="<?php echo $vehiculo['nombre']; ?>" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="comprado">Comprado:</label>
+                        <input type="checkbox" id="comprado" name="comprado" <?php if($vehiculo['comprado']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha">Fecha de Ingreso:</label>
+                        <input type="date" id="fechaIngreso" name="fechaIngreso" <?php if($vehiculo['fechaIngreso']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="identificador">Identificador:</label>
+                        <input type="text" id="Identificador" name="Identificador" <?php if($vehiculo['identificador']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="observacion">Observacion:</label>
+                        <input type="text" id="observacion" name="observacion" <?php if($vehiculo['observacion']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="vencimientoRevision">Vencimiento Revision:</label>
+                        <input type="date" id="vencimientoRevision" name="vencimientoRevision" <?php if($vehiculo['vencimientoRevision']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="vencimientoPermisoCirculacion">Vencimiento Permiso Circulacion:</label>
+                        <input type="date" id="vencimientoPermisoCirculacion" name="vencimientoPermisoCirculacion" <?php if($vehiculo['vencimientoPermisoCirculacion']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                        <label for="numeroInterno">Numero Interno:</label>
+                        <input type="text" id="numeroInterno" name="numeroInterno" <?php if($vehiculo['numeroInterno']) echo "checked"; ?>>
+                    </div>
+                    <div class="form-group">
+                    <label for="nChasis">Número de Chasis:</label>
+        <input type="text" id="nChasis" name="nChasis" value="<?php echo $vehiculo['nChasis']; ?>"><br><br>
+        <label for="nMotor">Número de Motor:</label>
+        <input type="text" id="nMotor" name="nMotor" value="<?php echo $vehiculo['nMotor']; ?>"><br><br>
+        <label for="nCarroceria">Número de Carrocería:</label>
+        <input type="text" id="nCarroceria" name="nCarroceria" value="<?php echo $vehiculo['nCarroceria']; ?>"><br><br>
     </div>
-</body>
-</html>
+                    <!-- Agregar más campos según tu estructura de vehículos -->
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-<?php
-$conn->close();
-?>
+    <!-- Bootstrap JS y jQuery (si es necesario) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+    
+        
+</html>
