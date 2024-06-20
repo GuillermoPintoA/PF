@@ -5,14 +5,6 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
 }
-include 'db.php';
-
-// Extraer datos de la tabla vehiculos
-$sql_tipo1 = "SELECT * FROM vehiculo ";
-$result_tipo1 = $conn->query($sql_tipo1);
-
-$sql_tipo2 = "SELECT * FROM vehiculo ";
-$result_tipo2 = $conn->query($sql_tipo2);
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +33,7 @@ $result_tipo2 = $conn->query($sql_tipo2);
         <a href="javascript:void(0)" class="" onclick="closeNav()"></a>
 
         <a href="welcome.php">Listado</a>
-        <a href="historial.php">Historial</a>
+        <a href="#">Historial</a>
         <a href="#">Gastos</a>
         <a href="logout.php">Salir</a>
     </div>
@@ -50,86 +42,74 @@ $result_tipo2 = $conn->query($sql_tipo2);
 
 
     <a href="agregar_vehiculo.php" class="add-btn">Agregar Vehículo</a>
-
-   <br>
-   <div class="card">
+        <div class="card">
             <h2>Lista de Autos</h2>
             <table id="autosTable" class="display">
                 <thead>
                     <tr>
-                        
+                        <th>ID</th>
                         <th>Nombre</th>
-                        <th>N° Chasis</th>
                         <th>Patente</th>
-                        <th>Marca</th>
-                        <th>Tipo Vehículo</th>
+                        <th>Estado</th>
+                        <th>Revisión Técnica</th>
+                        <th>Permiso de Circulación</th>
+                        <th>Próxima Mantención</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    if ($result_tipo1->num_rows > 0) {
-                        while($row = $result_tipo1->fetch_assoc()) {
-                            echo "<tr>
-
-                                <td>{$row['nombre']}</td>
-                                <td>{$row['nChasis']}</td>
-                                <td>{$row['identificador']}</td>
-                                <td>{$row['nombre']}</td>
-                                <td>{$row['ano']}</td>
-                                <td>
-                                    <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
-                                    <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
-                                    <span class='action-icon doc-icon' onclick='addDocuments({$row['id_vehiculo']})'>&#128196;</span>
-                                </td>
-                                   </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='4'>No hay vehículos</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="card">
-            <h2>Lista de Maquinaria</h2>
-            <table id="autosTable" class="display">
-                <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>N° Chasis</th>
-                        <th>Patente</th>
-                        <th>Marca</th>
-                        <th>Tipo Vehículo</th>
-                        <th>Acciones</th>
+                        <td>1</td>
+                        <td>Auto A</td>
+                        <td>ABC123</td>
+                        <td>Activo</td>
+                        <td>2024-05-01</td>
+                        <td>2024-06-01</td>
+                        <td>14000</td>
+                        <td>
+                            <button class="editbtn">Editar</button>
+                            <button class="deletebtn">Eliminar</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result_tipo2->num_rows > 0) {
-                        while($row = $result_tipo2->fetch_assoc()) {
-                            echo "<tr>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['nChasis']}</td>
-                            <td>{$row['identificador']}</td>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['ano']}</td>
-                                <td>
-                                    <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
-                                    <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
-                                    <span class='action-icon doc-icon' onclick='addDocuments({$row['id_vehiculo']})'>&#128196;</span>
-                                </td>
-                               </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='4'>No hay vehículos</td></tr>";
-                    }
-                    ?>
+                    <!-- Puedes agregar más filas aquí -->
                 </tbody>
             </table>
         </div>
    <br>
-
+   <br>
+    <div class="card">
+            <h2>Lista de Maquinaria</h2>
+            <table id="maquinariaTable" class="display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Último Mantenimiento</th>
+                        <th>Permiso de Circulación</th>
+                        <th>Próxima Mantención</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Maquina A</td>
+                        <td>Tipo 1</td>
+                        <td>Activo</td>
+                        <td>2024-04-15</td>
+                        <td>2024-06-01</td>
+                        <td>16000</td>
+                        <td>
+                            <button class="editbtn">Editar</button>
+                            <button class="deletebtn">Eliminar</button>
+                        </td>
+                    </tr>
+                    <!-- Puedes agregar más filas aquí -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -171,29 +151,6 @@ $result_tipo2 = $conn->query($sql_tipo2);
         // Abre el menú lateral al cargar la página
         openNav();
     });
-    function deleteVehicle(id_vehiculo) {
-            if (confirm("¿Estás seguro de que deseas eliminar este vehículo?")) {
-                $.ajax({
-                    url: 'eliminar_vehiculo.php',
-                    type: 'POST',
-                    data: { id_vehiculo: id_vehiculo },
-                    success: function(response) {
-                        if (response == 'success') {
-                            alert("Vehículo eliminado exitosamente");
-                            location.reload();
-                        } else {
-                            alert("Error al eliminar el vehículo");
-                        }
-                    }
-                });
-            }
-        }
-        function editVehicle(id_vehiculo) {
-            window.location.href = `editar_vehiculo.php?id=${id_vehiculo}`;
-        }
-        function addDocuments(id_vehiculo) {
-            window.location.href = `agregar_documentos.php?id=${id_vehiculo}`;
-        }
     </script>
 </body>
 </html>
