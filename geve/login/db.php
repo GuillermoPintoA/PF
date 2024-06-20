@@ -1,17 +1,16 @@
 <?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "geve";
 
+// Crear conexión
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-$host = 'localhost'; // Nombre del servidor de la base de datos
-$dbname = 'login_system'; // Nombre de la base de datos
-$user = 'root'; // Nombre de usuario de la base de datos
-$password = ''; // Contraseña de la base de datos
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Error de conexión: ' . $e->getMessage());
+// Verificar conexión
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
 }
-$conexion=new mysqli("localhost","root","","login_system");
+
 
 ?>

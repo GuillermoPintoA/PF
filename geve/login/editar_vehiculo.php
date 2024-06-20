@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($conn->query($sql) === TRUE) {
         // Registrar la acción en el historial
-        $usuario = $_SESSION['username'];
+        $usuario = $_SESSION['nombre']. ' ' .$_SESSION['apellido'];
         $sql_historial = "INSERT INTO historial (id_vehiculo,nombre_vehiculo, accion, usuario) VALUES ('$id_vehiculo','$nombre', 'editado', '$usuario')";
         $conn->query($sql_historial);
 
@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             box-sizing: border-box;
         }
         input[type="submit"] {
-            background-color: #4CAF50;
+            background-color:  #d73c3e;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             cursor: pointer;
         }
         input[type="submit"]:hover {
-            background-color: #45a049;
+            background-color:  #d73c3e;
         }
     </style>
 </head>

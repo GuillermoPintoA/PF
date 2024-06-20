@@ -16,8 +16,8 @@ $result = $conn->query($sql);
 
 <!DOCTYPE html>
 <html>
-<head>  
-    <title>Welcome</title>
+<head>
+    <title>Ver reportes</title>
     <script src="https://kit.fontawesome.com/568b99fb45.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" type="text/css" href="menu.css">
     <!-- Incluye jQuery y DataTables CSS y JS -->
@@ -28,20 +28,23 @@ $result = $conn->query($sql);
     <script type="text/javascript" charset="utf8" src="Spanish.json"></script>
 </head> 
 <body>
-<div class="card"> 
+
     <div id="mySidenav" class="sidenav">
  
     <div class="user-info">
-  
-            <img src="../img/user-icon.png" alt="User Icon">
-            <p><?php echo $_SESSION['username']; ?></p>  
+    <a href="perfil.php">
+            <img  src="../img/user-icon.png" alt="User Icon" onclick="perfil.php"></a>
+            <p><?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ; ?></p>  
         
         </div>
         <a href="javascript:void(0)" class="" onclick="closeNav()"></a>
 
         <a href="welcome.php">Listado</a>
         <a href="historial.php">Historial</a>
-        <a href="#">Gastos</a>
+        <?php if ($_SESSION['cargo'] == 'Administrador') { ?>
+            <a href="agregar_usuario.php">Agregar usuario</a>
+        <?php } ?>
+        <a href="ver_reporte.php">Reporte</a>
         <a href="logout.php">Salir</a>
     </div>
     </div>

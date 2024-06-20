@@ -1,24 +1,25 @@
 <?php
 session_start();
-
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
-}
 include 'db.php';
 
-// Extraer datos de la tabla vehiculos
-$sql_tipo1 = "SELECT * FROM vehiculo ";
-$result_tipo1 = $conn->query($sql_tipo1);
+// Verifica si el usuario ha iniciado sesión
+if (!isset($_SESSION['username'])) {
+    header("Location: index.php");
+    exit();
+}
 
-$sql_tipo2 = "SELECT * FROM vehiculo ";
-$result_tipo2 = $conn->query($sql_tipo2);
+// Obtener la lista de reportes
+$sql = "SELECT r.id_reporte, r.fecha_reporte, r.descripcion, v.nombre AS nombre_vehiculo, m.nombre AS motivo
+        FROM reporte r
+        JOIN Vehiculo v ON r.id_vehiculo = v.id_vehiculo
+        JOIN motivo m ON r.id_motivo = m.id_motivo";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Inicio</title>
+    <title>Ver reportes</title>
     <script src="https://kit.fontawesome.com/568b99fb45.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" type="text/css" href="menu.css">
     <!-- Incluye jQuery y DataTables CSS y JS -->
@@ -27,9 +28,14 @@ $result_tipo2 = $conn->query($sql_tipo2);
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     <!-- Incluye el archivo de idioma español -->
     <script type="text/javascript" charset="utf8" src="Spanish.json"></script>
+    <script>
+        $(document).ready( function () {
+            $('#reportesTable').DataTable();
+        } );
+    </script>
 </head> 
 <body>
-<div class="card"> 
+
     <div id="mySidenav" class="sidenav">
  
     <div class="user-info">
@@ -50,59 +56,42 @@ $result_tipo2 = $conn->query($sql_tipo2);
     </div>
     </div>
     <div id="main">
-
-
-    <a href="agregar_vehiculo.php" class="add-btn">Agregar Vehículo</a>
-
-   <br>
-   <div class="card">
-            <h2>Lista de Autos</h2>
-            <table id="autosTable" class="display">
+    <a href="generar_reporte.php" class="add-btn">Generar Reporte</a>
+        <h1>Lista de Reportes</h1>
+        <div class="card"> 
+        <?php if ($result->num_rows > 0) { ?>
+            <table id="reportesTable" class="display">
                 <thead>
                     <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                        <th>Patente</th>
-                        <th>Marca</th>
-                        <th>Año</th>
-                        <th>Prox Revision</th>
-                        <th>Prox Permiso Circulacion</th>
+                        <th>ID Reporte</th>
+                        <th>Vehículo</th>
+                        <th>Fecha del Reporte</th>
+                        <th>Descripción</th>
+                        <th>Motivo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    if ($result_tipo1->num_rows > 0) {
-                        while($row = $result_tipo1->fetch_assoc()) {
-                            echo "<tr>
-                            <td>{$row['id_vehiculo']}</td>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['identificador']}</td>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['ano']}</td>
-                            <td>{$row['vencimientoRevision']}</td>
-                            <td>{$row['vencimientoPermisoCirculacion']}</td>
-                                <td> 
-
-                                    <span class='action-icon view-icon' onclick='viewVehicle({$row['id_vehiculo']})'>&#128065;</span>
-                                    <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
-                                    <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
-                                   
-                                   
-                                </td>
-                                   </tr>";
-                           
-                        }
-                    } else {
-                        echo "<tr><td colspan='4'>No hay vehículos</td></tr>";
-                    }
-                    ?>
+                    <?php while($row = $result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><?php echo $row['id_reporte']; ?></td>
+                            <td><?php echo $row['nombre_vehiculo']; ?></td>
+                            <td><?php echo $row['fecha_reporte']; ?></td>
+                            <td><?php echo $row['descripcion']; ?></td>
+                            <td><?php echo $row['motivo']; ?></td>
+                            
+                            <td>
+                            <a href="ver_reporte_detalle.php?id_reporte=<?php echo $row['id_reporte']; ?>">&#x1f441;</a>
+                            <span class='action-icon delete-icon' onclick='deleteReporte({$row['id_reporte']})'>&#128465;</span>
+                                
+                            </td>
+                        </tr>
+                    <?php } ?>
                 </tbody>
             </table>
-        </div>
-
-   <br>
-
+        <?php } else { ?>
+            <p>No hay reportes disponibles.</p>
+        <?php } ?>
     </div>
 
     <script>
@@ -117,7 +106,7 @@ $result_tipo2 = $conn->query($sql_tipo2);
     }
 
     $(document).ready(function() {
-            $('#autosTable').DataTable({
+            $('#autosTable, #maquinariaTable').DataTable({
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                 },
@@ -161,35 +150,8 @@ $result_tipo2 = $conn->query($sql_tipo2);
                 });
             }
         }
-        function confirmDelete(idVehiculo) {
-    if (confirm("¿Está seguro de que desea eliminar este vehículo?")) {
-        // Enviar la solicitud AJAX para eliminar el vehículo
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "eliminar_vehiculo.php", true);
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                // Manejar la respuesta del servidor
-                alert(xhr.responseText); // Mostrar la respuesta del servidor
-                // Actualizar la página u otra acción necesaria después de la eliminación
-                location.reload(); // Recargar la página después de eliminar el vehículo
-            }
-        };
-        xhr.send("id_vehiculo=" + idVehiculo);
-    }
-}
-        function deleteVehicle1(id_vehiculo) {
-            window.location.href = `eliminar_vehiculo1.php?id=${id_vehiculo}`;
-        }
-        function editVehicle(id_vehiculo) {
-            window.location.href = `editar_vehiculo.php?id=${id_vehiculo}`;
-        }
-        function addDocuments(id_vehiculo) {
-            window.location.href = `agregar_documentos.php?id=${id_vehiculo}`;
-        }
-        function viewVehicle(id_vehiculo) {
-            window.location.href = `ver_vehiculo_detalle.php?id=${id_vehiculo}`;
-        }
     </script>
 </body>
 </html>
+
+<?php $conn->close(); ?>
