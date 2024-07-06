@@ -2,19 +2,35 @@
 include 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $n_chasis = $_POST['nombre'];
-    $n_chasis = $_POST['n_chasis'];
     $patente = $_POST['patente'];
-    $marca = $_POST['marca'];
-    $tipo_vehiculo = $_POST['tipo_vehiculo'];
+    $fechaIngreso = $_POST['fechaIngreso'];
+    $observacion = $_POST['observacion'];
+    $vencimientoRevision = $_POST['vencimientoRevision'];
+    $vencimientoPermisoCirculacion = $_POST['vencimientoPermisoCirculacion'];
+    $ano = $_POST['ano'];
+    $nChasis = $_POST['nChasis'];
+    $nMotor = $_POST['nMotor'];
+    $nCarroceria = $_POST['nCarroceria'];
+    $id_modelo = $_POST['id_modelo'];
+    $id_modelo = $_POST['id_comprado'];
 
-    $sql = "INSERT INTO vehiculos (nombre,n_chasis, patente, marca, tipo_vehiculo) VALUES ('$n_chasis','$n_chasis', '$patente', '$marca', '$tipo_vehiculo')";
 
-    if ($conn->query($sql) === TRUE) {
-        echo "Vehículo agregado exitosamente";
+    $sql = "INSERT INTO Vehiculo (patente, fechaIngreso, observacion, vencimientoRevision, vencimientoPermisoCirculacion, ano, nChasis, nMotor, nCarroceria, id_modelo,id_comprado) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("sissssisssi", $patente, $fechaIngreso, $observacion, $vencimientoRevision, $vencimientoPermisoCirculacion, $ano, $nChasis, $nMotor, $nCarroceria, $id_modelo,$comprado);
+
+        if ($stmt->execute()) {
+            header("Location: welcome.php?success=1");
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+        $stmt->close();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error en la preparación de la declaración: " . $conn->error;
     }
+    $conn->close();
 }
 ?>
 

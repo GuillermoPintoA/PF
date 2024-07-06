@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
         $_SESSION['username'] = $row['mail'];
         $_SESSION['nombre'] = $row['nombre'];
-        $_SESSION['apellido'] = $row['apellido'];
+        $_SESSION['apellido'] = $row['apellidoP'];
         $_SESSION['rut'] = $row['rut'];
         $_SESSION['dv_rut'] = $row['dv_rut'];
         $_SESSION['fechacreacion'] = $row['fechacreacion'];
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form action="login.php" method="post">
             <h2>Login</h2>
             <div class="form-group">
-                <label for="username">Email o RUT:</label>
+                <label for="username">Email:</label>
                 <input type="text" id="username" name="username" required>
             </div>
             <div class="form-group">

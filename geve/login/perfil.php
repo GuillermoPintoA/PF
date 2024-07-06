@@ -3,7 +3,7 @@ session_start();
 
 // Verifica si el usuario ha iniciado sesión
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
+    header("Location: perfil.php");
     exit();
 }
 ?>
@@ -40,6 +40,7 @@ if (!isset($_SESSION['username'])) {
         <?php if ($_SESSION['cargo'] == 'Administrador') { ?>
             <a href="agregar_usuario.php">Agregar usuario</a>
         <?php } ?>
+        <a href="ver_reporte.php">Reporte</a>
         <a href="logout.php">Salir</a>
     </div>
     </div>
@@ -47,10 +48,15 @@ if (!isset($_SESSION['username'])) {
 
     <div id="main">
         <h1>Perfil del Usuario</h1>
-        <p><strong>Nombre:</strong> <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?></p>
+        <p><strong>Nombre:</strong> <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellidoP']; ?></p>
         <p><strong>Cargo:</strong> <?php echo $_SESSION['cargo']; ?></p>
         <p><strong>Email:</strong> <?php echo $_SESSION['username']; ?></p>
         <p><strong>RUT:</strong> <?php echo $_SESSION['rut'] . '-' . $_SESSION['dv_rut']; ?></p>
+        <div class="confirmation">
+        <div class="tick"></div>
+
+        <a href="editar_perfil.php">Regresar</a>
+    </div>
     </div>
 
     <script>

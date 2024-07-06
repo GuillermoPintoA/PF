@@ -34,7 +34,7 @@ $result = $conn->query($sql);
     <div class="user-info">
     <a href="perfil.php">
             <img  src="../img/user-icon.png" alt="User Icon" onclick="perfil.php"></a>
-            <p><?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ; ?></p>  
+            <p><?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellidoP']; ; ?></p>  
         
         </div>
         <a href="javascript:void(0)" class="" onclick="closeNav()"></a>
@@ -56,7 +56,7 @@ $result = $conn->query($sql);
                 <thead>
                     <tr>
                     <th>ID Vehículo</th>
-                        <th>Nombre Vehículo</th>
+                        <th>Patente Vehículo</th>
                         <th>Acción</th>
                         <th>Fecha</th>
                         <th>Usuario</th>
@@ -68,7 +68,7 @@ $result = $conn->query($sql);
                         while($row = $result->fetch_assoc()) {
                             echo "<tr>
                             <td>{$row['id_vehiculo']}</td>
-                            <td>{$row['nombre_vehiculo']}</td>
+                            <td>{$row['patente_vehiculo']}</td>
                             <td>{$row['accion']}</td>
                             <td>{$row['fecha']}</td>
                             <td>{$row['usuario']}</td>

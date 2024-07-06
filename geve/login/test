@@ -4,8 +4,8 @@ include 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = $_POST['nombre'];
-    $apellidoP = $_POST['apellidoP'];
-    $apellidoM = $_POST['apellidoM'];
+    $apellido = $_POST['apellidoP'];
+    $apellido = $_POST['apellidoM'];
     $cargo = $_POST['cargo'];
     $mail = $_POST['mail'];
     $claveweb = $_POST['claveweb'];
@@ -28,8 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script>
         function validateForm() {
             const nombre = document.getElementById('nombre').value;
-            const apellidoPaterno = document.getElementById('apellido_paterno').value;
-            const apellido = document.getElementById('apellido').value;
+            const apellidoPaterno = document.getElementById('apellidoP').value;
+            const apellido = document.getElementById('apellidoM').value;
             const cargo = document.getElementById('cargo').value;
             const mail = document.getElementById('mail').value;
             const claveweb = document.getElementById('claveweb').value;
@@ -85,37 +85,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
     
         <div id="main">         
-<h1>Registrar Usuario</h1>
-<div class="container mt-5">
-    <div class="card">
         
-    <form method="post" action="agregar_usuario.php">
-    <label for="nombre">Nombre:</label>
+    <body>
+    <h1>Agregar Usuario</h1>
+    <form action="procesar_agregar_usuario.php" method="post" onsubmit="return validateForm()">
+        <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" required><br><br>
-         &nbsp;
-        <label for="apellidoP">Apellido Paterno:</label>&nbsp;
-        <input type="text" id="apellidoP" name="apellidoP" required><br><br>
-        <label for="apellidoM">Apellido Materno:</label>
-        <input type="text" id="apellidoM" name="apellidoM" required><br><br>
+        
+        <label for="apellido_paterno">Apellido Paterno:</label>
+        <input type="text" id="apellido_paterno" name="apellido_paterno" required><br><br>
+        
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" name="apellido" required><br><br>
+
+        <label for="cargo">Cargo:</label>
+        <input type="text" id="cargo" name="cargo" required><br><br>
+
         <label for="mail">Email:</label>
-        <input type="email" id="mail" name="mail" required><br><br>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="email" id="mail" name="mail" required><br><br>
+
         <label for="claveweb">Contraseña:</label>
         <input type="password" id="claveweb" name="claveweb" required><br><br>
+
         <label for="rut">RUT:</label>
-        <input style='width: 10ch; display: inline-block;' type="text" id="rut" name="rut" required pattern="[0-9]{7,8}" maxlength="8">-
+        <input type="text" id="rut" name="rut" required pattern="[0-9]{7,8}" maxlength="8"><br><br>
 
-        <label for="dv_rut"></label>
-        <input style='width: 2ch; display: inline-block;' type="text" id="dv_rut" name="dv_rut" required maxlength="1"><br><br>
+        <label for="dv_rut">Dígito Verificador:</label>
+        <input type="text" id="dv_rut" name="dv_rut" required maxlength="1"><br><br>
 
-        <label for="rol">Cargo:</label>
-        <select id="rol" name="Cargo">
-            <option value="admin">Administrador</option>
-            <option value="usuario">Gerente</option>
-            <option value="usuario">Técnico</option>
-            <option value="usuario">Empleado</option>
-        </select><br><br><br><br>
         <input type="submit" value="Registrar">
     </form>
+</body>
     </div>
     </div>
 </body>

@@ -76,7 +76,7 @@ $result_docs = $stmt_docs->get_result();
             text-decoration: none;
             border-radius: 5px;
         }
-    }
+    
         .documents {
             margin-top: 20px;
         }
@@ -114,8 +114,8 @@ $result_docs = $stmt_docs->get_result();
                 <td><?php echo htmlspecialchars($vehiculo['id_vehiculo']); ?></td>
             </tr>
             <tr>
-                <th>Nombre</th>
-                <td><?php echo htmlspecialchars($vehiculo['nombre']); ?></td>
+                <th>Patente</th>
+                <td><?php echo htmlspecialchars($vehiculo['patente']); ?></td>
             </tr>
             <tr>
                 <th>Comprado</th>
@@ -124,10 +124,6 @@ $result_docs = $stmt_docs->get_result();
             <tr>
                 <th>Fecha de Ingreso</th>
                 <td><?php echo htmlspecialchars($vehiculo['fechaIngreso']); ?></td>
-            </tr>
-            <tr>
-                <th>Identificador</th>
-                <td><?php echo htmlspecialchars($vehiculo['identificador']); ?></td>
             </tr>
             <tr>
                 <th>Observación</th>
@@ -142,16 +138,8 @@ $result_docs = $stmt_docs->get_result();
                 <td><?php echo htmlspecialchars($vehiculo['vencimientoPermisoCirculacion']); ?></td>
             </tr>
             <tr>
-                <th>Observaciones de Compra</th>
-                <td><?php echo nl2br(htmlspecialchars($vehiculo['obsCompra'])); ?></td>
-            </tr>
-            <tr>
                 <th>Año</th>
                 <td><?php echo htmlspecialchars($vehiculo['ano']); ?></td>
-            </tr>
-            <tr>
-                <th>Número Interno</th>
-                <td><?php echo htmlspecialchars($vehiculo['numeroInterno']); ?></td>
             </tr>
             <tr>
                 <th>Número de Chasis</th>
@@ -166,7 +154,7 @@ $result_docs = $stmt_docs->get_result();
                 <td><?php echo htmlspecialchars($vehiculo['nCarroceria']); ?></td>
             </tr>
         </table>
-        <a href="welcome.php" class="btn-back">Volver</a>
+        
         <div class="documents">
             <h3>Documentos</h3>
             <form action="upload_document.php" method="post" enctype="multipart/form-data">
@@ -202,6 +190,7 @@ $result_docs = $stmt_docs->get_result();
                     ?>
                 </tbody>
             </table>
+            <a href="welcome.php" class="btn-back">Volver</a>
         </div>
     </div>
 </body>

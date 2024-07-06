@@ -1,154 +1,241 @@
 <?php
-session_start();
 include 'db.php';
 
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $id_vehiculo = $_GET['id'];
 
-
-// Verificar si el usuario ha iniciado sesión
-if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
-    exit();
+    $sql = "SELECT * FROM Vehiculo WHERE id_vehiculo = ?";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $id_vehiculo);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $vehiculo = $result->fetch_assoc();
+        $stmt->close();
+    } else {
+        echo "Error en la preparación de la declaración: " . $conn->error;
+        exit;
+    }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_vehiculo = $_POST['id_vehiculo'];
-    $nombre = $_POST['nombre'];
+    $patente = $_POST['patente'];
     $comprado = isset($_POST['comprado']) ? 1 : 0;
     $fechaIngreso = $_POST['fechaIngreso'];
-    $identificador = $_POST['identificador'];
     $observacion = $_POST['observacion'];
     $vencimientoRevision = $_POST['vencimientoRevision'];
     $vencimientoPermisoCirculacion = $_POST['vencimientoPermisoCirculacion'];
-    $obsCompra = $_POST['obsCompra'];
     $ano = $_POST['ano'];
-    $numeroInterno = $_POST['numeroInterno'];
     $nChasis = $_POST['nChasis'];
     $nMotor = $_POST['nMotor'];
     $nCarroceria = $_POST['nCarroceria'];
+    $id_modelo = $_POST['id_modelo'];
 
-    $sql = "UPDATE Vehiculo SET nombre='$nombre', comprado='$comprado', fechaIngreso='$fechaIngreso', identificador='$identificador', observacion='$observacion', vencimientoRevision='$vencimientoRevision', vencimientoPermisoCirculacion='$vencimientoPermisoCirculacion', obsCompra='$obsCompra', ano='$ano', numeroInterno='$numeroInterno', nChasis='$nChasis', nMotor='$nMotor', nCarroceria='$nCarroceria' WHERE id_vehiculo='$id_vehiculo'";
+    // Verificar cambios
+    $sql_check = "SELECT * FROM Vehiculo WHERE id_vehiculo = ?";
+    if ($stmt_check = $conn->prepare($sql_check)) {
+        $stmt_check->bind_param("i", $id_vehiculo);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+        $vehiculo_orig = $result_check->fetch_assoc();
+        $stmt_check->close();
 
-    if ($conn->query($sql) === TRUE) {
-        // Registrar la acción en el historial
-        $usuario = $_SESSION['nombre']. ' ' .$_SESSION['apellido'];
-        $sql_historial = "INSERT INTO historial (id_vehiculo,nombre_vehiculo, accion, usuario) VALUES ('$id_vehiculo','$nombre', 'editado', '$usuario')";
-        $conn->query($sql_historial);
+        $cambios = [];
+        foreach ($vehiculo_orig as $campo => $valor_orig) {
+            if ($vehiculo_orig[$campo] != $$campo) {
+                $cambios[] = $campo;
+            }
+        }
 
-        header("Location: welcome.php");
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        if (!empty($cambios) || isset($_POST['confirm'])) {
+            $sql = "UPDATE Vehiculo SET patente = ?, comprado = ?, fechaIngreso = ?, observacion = ?, vencimientoRevision = ?, vencimientoPermisoCirculacion = ?, ano = ?, nChasis = ?, nMotor = ?, nCarroceria = ?, id_modelo = ? WHERE id_vehiculo = ?";
+
+            if ($stmt = $conn->prepare($sql)) {
+                $stmt->bind_param("sissssisssii", $patente, $comprado, $fechaIngreso, $observacion, $vencimientoRevision, $vencimientoPermisoCirculacion, $ano, $nChasis, $nMotor, $nCarroceria, $id_modelo, $id_vehiculo);
+
+                if ($stmt->execute()) {
+                    // Manejar carga de archivos
+                    if ($_FILES['archivo']['name']) {
+                        $target_dir = "uploads/";
+                        $target_file = $target_dir . basename($_FILES["archivo"]["name"]);
+                        $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+                        // Validar tipo de archivo
+                        if ($fileType != "pdf" && $fileType != "png") {
+                            echo "Solo se permiten archivos PDF y PNG.";
+                        } else {
+                            if (move_uploaded_file($_FILES["archivo"]["tmp_name"], $target_file)) {
+                                // Guardar el archivo en la base de datos
+                                $sql_file = "INSERT INTO Archivos (id_vehiculo, nombre_archivo, ruta_archivo) VALUES (?, ?, ?)";
+                                if ($stmt_file = $conn->prepare($sql_file)) {
+                                    $stmt_file->bind_param("iss", $id_vehiculo, $_FILES["archivo"]["name"], $target_file);
+                                    $stmt_file->execute();
+                                    $stmt_file->close();
+                                }
+                            } else {
+                                echo "Hubo un error al subir el archivo.";
+                            }
+                        }
+                    }
+
+                    header("Location: ver_vehiculo_detalle.php?id=$id_vehiculo");
+                    exit;
+                } else {
+                    echo "Error: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                echo "Error en la preparación de la declaración: " . $conn->error;
+            }
+        } else {
+            echo "<script>
+                if (confirm('No se han realizado cambios. ¿Desea continuar?')) {
+                    document.forms['editForm'].submit();
+                } else {
+                    window.location.href = 'editar_vehiculo.php?id=$id_vehiculo';
+                }
+            </script>";
+        }
     }
-
     $conn->close();
-} else {
-    $id_vehiculo = $_GET['id'];
-    $sql = "SELECT * FROM Vehiculo WHERE id_vehiculo='$id_vehiculo'";
-    $result = $conn->query($sql);
-    $vehiculo = $result->fetch_assoc();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Editar Vehículo</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
+        .vehicle-details {
+            max-width: 600px;
+            margin: auto;
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
         }
-        .form-group {
-            margin-bottom: 20px;
+        .vehicle-details h2 {
+            text-align: center;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input[type="text"], select {
+        .vehicle-details table {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            border-collapse: collapse;
         }
-        input[type="submit"] {
+        .vehicle-details th, .vehicle-details td {
+            padding: 10px;
+            text-align: left;
+        }
+        .vehicle-details th {
+            background-color: #f2f2f2;
+        }
+        .btn-back {
+            display: block;
+            width: 100px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
             background-color:  #d73c3e;
             color: white;
-            padding: 10px 20px;
-            border: none;
+            text-decoration: none;
             border-radius: 5px;
-            cursor: pointer;
         }
-        input[type="submit"]:hover {
+    
+        .documents {
+            margin-top: 20px;
+        }
+        .documents table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .documents th, .documents td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .documents th {
+            background-color: #f2f2f2;
+        }
+        .btn-upload {
+            display: block;
+            width: 150px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
             background-color:  #d73c3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
         }
     </style>
+    <script>
+        function confirmSubmit() {
+            var cambios = <?php echo json_encode($cambios); ?>;
+            if (cambios.length === 0) {
+                return confirm('No se han realizado cambios. ¿Desea continuar?');
+            }
+            return true;
+        }
+    </script>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="card">
-            <h5 class="card-header">Editar Vehículo</h5>
-            <div class="card-body">
-                <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                    <input type="hidden" name="id_vehiculo" value="<?php echo $vehiculo['id_vehiculo']; ?>">
-                    <div class="form-group">
-                        <label for="nombre">Nombre:</label>
-                        <input type="text" id="nombre" name="nombre" value="<?php echo $vehiculo['nombre']; ?>" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="comprado">Comprado:</label>
-                        <input type="checkbox" id="comprado" name="comprado" <?php if($vehiculo['comprado']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha">Fecha de Ingreso:</label>
-                        <input type="date" id="fechaIngreso" name="fechaIngreso" <?php if($vehiculo['fechaIngreso']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="identificador">Identificador:</label>
-                        <input type="text" id="Identificador" name="Identificador" <?php if($vehiculo['identificador']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="observacion">Observacion:</label>
-                        <input type="text" id="observacion" name="observacion" <?php if($vehiculo['observacion']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="vencimientoRevision">Vencimiento Revision:</label>
-                        <input type="date" id="vencimientoRevision" name="vencimientoRevision" <?php if($vehiculo['vencimientoRevision']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="vencimientoPermisoCirculacion">Vencimiento Permiso Circulacion:</label>
-                        <input type="date" id="vencimientoPermisoCirculacion" name="vencimientoPermisoCirculacion" <?php if($vehiculo['vencimientoPermisoCirculacion']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                        <label for="numeroInterno">Numero Interno:</label>
-                        <input type="text" id="numeroInterno" name="numeroInterno" <?php if($vehiculo['numeroInterno']) echo "checked"; ?>>
-                    </div>
-                    <div class="form-group">
-                    <label for="nChasis">Número de Chasis:</label>
-        <input type="text" id="nChasis" name="nChasis" value="<?php echo $vehiculo['nChasis']; ?>"><br><br>
-        <label for="nMotor">Número de Motor:</label>
-        <input type="text" id="nMotor" name="nMotor" value="<?php echo $vehiculo['nMotor']; ?>"><br><br>
-        <label for="nCarroceria">Número de Carrocería:</label>
-        <input type="text" id="nCarroceria" name="nCarroceria" value="<?php echo $vehiculo['nCarroceria']; ?>"><br><br>
-    </div>
-                    <!-- Agregar más campos según tu estructura de vehículos -->
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="vehicle-details">
+    <h1>Editar Vehículo</h1>
+    <table>
+    <form name="editForm" action="editar_vehiculo.php" method="post" enctype="multipart/form-data" onsubmit="return confirmSubmit()">
+    <tr> 
+        <input type="hidden" name="id_vehiculo" value="<?php echo $vehiculo['id_vehiculo'] ?? ''; ?>">
+        <input type="hidden" name="confirm" value="1">
+        </tr>
+        <tr>
+        <label for="patente">Patente:</label>
+        <input type="text" name="patente" value="<?php echo $vehiculo['patente'] ?? ''; ?>" required pattern="[A-Z]{2}[0-9]{4}"><br>
+        </tr>
+        <label for="comprado">Comprado:</label>
+        <input type="checkbox" name="comprado" <?php echo isset($vehiculo['comprado']) && $vehiculo['comprado'] ? 'checked' : ''; ?>><br>
 
-    <!-- Bootstrap JS y jQuery (si es necesario) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <label for="fechaIngreso">Fecha de Ingreso:</label>
+        <input type="date" name="fechaIngreso" value="<?php echo $vehiculo['fechaIngreso'] ?? ''; ?>" required><br>
+
+        <label for="observacion">Observación:</label>
+        <textarea name="observacion" required><?php echo $vehiculo['observacion'] ?? ''; ?></textarea><br>
+
+        <label for="vencimientoRevision">Vencimiento de Revisión:</label>
+        <input type="date" name="vencimientoRevision" value="<?php echo $vehiculo['vencimientoRevision'] ?? ''; ?>" required><br>
+
+        <label for="vencimientoPermisoCirculacion">Vencimiento de Permiso de Circulación:</label>
+        <input type="date" name="vencimientoPermisoCirculacion" value="<?php echo $vehiculo['vencimientoPermisoCirculacion'] ?? ''; ?>" required><br>
+
+        <label for="ano">Año:</label>
+        <input type="number" name="ano" value="<?php echo $vehiculo['ano'] ?? ''; ?>" required><br>
+
+        <label for="nChasis">Número de Chasis:</label>
+        <input type="text" name="nChasis" value="<?php echo $vehiculo['nChasis'] ?? ''; ?>" required><br>
+
+        <label for="nMotor">Número de Motor:</label>
+        <input type="text" name="nMotor" value="<?php echo $vehiculo['nMotor'] ?? ''; ?>" required><br>
+
+        <label for="nCarroceria">Número de Carrocería:</label>
+        <input type="text" name="nCarroceria" value="<?php echo $vehiculo['nCarroceria'] ?? ''; ?>" required><br>
+
+        <label for="id_modelo">Modelo:</label>
+        <select name="id_modelo" required>
+            <?php
+            include 'db.php';
+            $sql_modelos = "SELECT id_modelo, nombre FROM Modelo";
+            $result_modelos = $conn->query($sql_modelos);
+            while ($modelo = $result_modelos->fetch_assoc()) {
+                $selected = isset($vehiculo['id_modelo']) && $vehiculo['id_modelo'] == $modelo['id_modelo'] ? 'selected' : '';
+                echo "<option value='{$modelo['id_modelo']}' $selected>{$modelo['nombre']}</option>";
+            }
+            $conn->close();
+            ?>
+        </select><br>
+        </table>
+        <label for="archivo">Subir Documento (PDF o PNG):</label>
+        <input type="file" name="archivo"><br>
+
+        <input type="submit" value="Guardar Cambios">
+    </form>
 </body>
-    
-        
 </html>

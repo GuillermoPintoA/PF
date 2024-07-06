@@ -8,11 +8,19 @@ if (!isset($_SESSION['username'])) {
 include 'db.php';
 
 // Extraer datos de la tabla vehiculos
-$sql_tipo1 = "SELECT * FROM vehiculo ";
+$sql_tipo1 = "SELECT v.id_vehiculo, v.patente, v.fechaIngreso, v.vencimientoRevision, v.vencimientoPermisoCirculacion,v.nChasis,v.nMotor,v.nCarroceria, v.ano, m.nombre AS nombre_modelo, marca.nombre AS nombre_marca 
+FROM vehiculo v
+INNER JOIN Modelo m ON v.id_modelo = m.id_modelo
+INNER JOIN Marca marca ON m.id_marca = marca.id_marca";
 $result_tipo1 = $conn->query($sql_tipo1);
 
 $sql_tipo2 = "SELECT * FROM vehiculo ";
 $result_tipo2 = $conn->query($sql_tipo2);
+function formatearFecha($fecha) {
+    $date = new DateTime($fecha);
+    return $date->format('d/m/Y');
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -60,13 +68,16 @@ $result_tipo2 = $conn->query($sql_tipo2);
             <table id="autosTable" class="display">
                 <thead>
                     <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
+                   
                         <th>Patente</th>
                         <th>Marca</th>
-                        <th>Año</th>
-                        <th>Prox Revision</th>
-                        <th>Prox Permiso Circulacion</th>
+                        <th>Modelo</th>
+                       
+                        <th>Vencimiento Revisión</th>
+                         <th>Vencimiento Permiso Circulación</th>       
+                    <th>N° Chasis</th>
+                    <th>N° Motor</th>
+                    <th>N° Carrocería</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -74,17 +85,23 @@ $result_tipo2 = $conn->query($sql_tipo2);
                     <?php
                     if ($result_tipo1->num_rows > 0) {
                         while($row = $result_tipo1->fetch_assoc()) {
+                            $vencimientoRevision = formatearFecha($row['vencimientoRevision']);
+                            $vencimientoPermisoCirculacion = formatearFecha($row['vencimientoPermisoCirculacion']);
+                            
                             echo "<tr>
-                            <td>{$row['id_vehiculo']}</td>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['identificador']}</td>
-                            <td>{$row['nombre']}</td>
-                            <td>{$row['ano']}</td>
-                            <td>{$row['vencimientoRevision']}</td>
-                            <td>{$row['vencimientoPermisoCirculacion']}</td>
+                          
+                            <td>{$row['patente']}</td>
+                            <td>{$row['nombre_marca']}</td>
+                            <td>{$row['nombre_modelo']}</td>
+                            <td>{$vencimientoRevision}</td>
+                            <td>{$vencimientoPermisoCirculacion}</td>
+                            <td>{$row['nChasis']}</td>
+                            <td>{$row['nMotor']}</td>
+                            <td>{$row['nCarroceria']}</td>
                                 <td> 
 
                                     <span class='action-icon view-icon' onclick='viewVehicle({$row['id_vehiculo']})'>&#128065;</span>
+                                    <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
                                     <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
                                     <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
                                    
