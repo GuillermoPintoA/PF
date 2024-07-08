@@ -13,8 +13,8 @@ $patente = $vehiculo['patente'];
 $sql = "DELETE FROM vehiculo WHERE id_vehiculo = '$id_vehiculo'";
 if ($conn->query($sql) === TRUE) {
     // Registrar la acción en el historial
-    $usuario = $_SESSION['nombre']. ' ' .$_SESSION['apellidoP'];
-    $sql_historial = "INSERT INTO historial (id_vehiculo,patente_vehiculo, accion, usuario) VALUES ('$id_vehiculo','$patente', 'eliminado', '$usuario')";
+    $usuario = $_SESSION['nombre']. ' ' .$_SESSION['apellidoP']. ' ' .$_SESSION['apellidoM'];
+    $sql_historial = "INSERT INTO historial (id_vehiculo,patente, accion, usuario) VALUES ('$id_vehiculo','$patente', 'eliminado', '$usuario')";
     $conn->query($sql_historial);
 
     echo 'success';

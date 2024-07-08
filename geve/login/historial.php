@@ -55,7 +55,7 @@ $result = $conn->query($sql);
             <table id="historialTable" class="display">
                 <thead>
                     <tr>
-                    <th>ID Vehículo</th>
+                   
                         <th>Patente Vehículo</th>
                         <th>Acción</th>
                         <th>Fecha</th>
@@ -67,8 +67,8 @@ $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
                             echo "<tr>
-                            <td>{$row['id_vehiculo']}</td>
-                            <td>{$row['patente_vehiculo']}</td>
+                            
+                            <td>{$row['patente']}</td>
                             <td>{$row['accion']}</td>
                             <td>{$row['fecha']}</td>
                             <td>{$row['usuario']}</td>

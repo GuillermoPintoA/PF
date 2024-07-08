@@ -10,7 +10,7 @@ if (!isset($_SESSION['username'])) {
 
 $id_reporte = $_GET['id_reporte'];
 
-$sql = "SELECT r.*, v.nombre AS nombre_vehiculo FROM reporte r JOIN Vehiculo v ON r.id_vehiculo = v.id_vehiculo WHERE r.id_reporte = $id_reporte";
+$sql = "SELECT r.*, v.patente AS nombre_vehiculo FROM reporte r JOIN Vehiculo v ON r.id_vehiculo = v.id_vehiculo WHERE r.id_reporte = $id_reporte";
 $result = $conn->query($sql);
 
 if ($result->num_rows == 1) {

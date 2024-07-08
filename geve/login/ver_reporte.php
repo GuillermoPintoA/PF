@@ -9,7 +9,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Obtener la lista de reportes
-$sql = "SELECT r.id_reporte, r.fecha_reporte, r.descripcion, v.nombre AS nombre_vehiculo, m.nombre AS motivo
+$sql = "SELECT r.id_reporte, r.fecha_reporte, r.descripcion, v.patente AS nombre_vehiculo, m.nombre AS motivo
         FROM reporte r
         JOIN Vehiculo v ON r.id_vehiculo = v.id_vehiculo
         JOIN motivo m ON r.id_motivo = m.id_motivo";
@@ -63,7 +63,7 @@ $result = $conn->query($sql);
             <table id="reportesTable" class="display">
                 <thead>
                     <tr>
-                        <th>ID Reporte</th>
+                       
                         <th>Vehículo</th>
                         <th>Fecha del Reporte</th>
                         <th>Descripción</th>
@@ -72,24 +72,22 @@ $result = $conn->query($sql);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($row = $result->fetch_assoc()) { ?>
-                        <tr>
-                            <td><?php echo $row['id_reporte']; ?></td>
-                            <td><?php echo $row['nombre_vehiculo']; ?></td>
-                            <td><?php echo $row['fecha_reporte']; ?></td>
-                            <td><?php echo $row['descripcion']; ?></td>
-                            <td><?php echo $row['motivo']; ?></td>
-                            
+                <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>
+                          
+                            <td>{$row['fecha_reporte']}</td>
+                            <td>{$row['descripcion']}</td>
+                            <td>{$row['motivo']}</td>
+                            <td>{$row['nombre_vehiculo']}</td>
                             <td>
-                            <a href="ver_reporte_detalle.php?id_reporte=<?php echo $row['id_reporte']; ?>">&#x1f441;</a>
-                            <span class='action-icon delete-icon' onclick='deleteReporte({$row['id_reporte']})'>&#128465;</span>
-                                
+                                <span class='action-icon view-icon' onclick='viewReport({$row['id_reporte']})'>&#128065;</span>
+                                <span class='action-icon delete-icon' onclick='deleteReport({$row['id_reporte']})'>&#128465;</span>
                             </td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        <?php } else { ?>
+                          </tr>";
+                }}
+         } else { ?>
             <p>No hay reportes disponibles.</p>
         <?php } ?>
     </div>
@@ -133,20 +131,11 @@ $result = $conn->query($sql);
         // Abre el menú lateral al cargar la página
         openNav();
     });
-    function deleteVehicle(id_vehiculo) {
-            if (confirm("¿Estás seguro de que deseas eliminar este vehículo?")) {
-                $.ajax({
-                    url: 'eliminar_vehiculo.php',
-                    type: 'POST',
-                    data: { id_vehiculo: id_vehiculo },
-                    success: function(response) {
-                        if (response == 'success') {
-                            alert("Vehículo eliminado exitosamente");
-                            location.reload();
-                        } else {
-                            alert("Error al eliminar el vehículo");
-                        }
-                    }
+    function deleteReport(id_reporte) {
+            if (confirm('¿Estás seguro de que deseas eliminar este reporte?')) {
+                $.post('eliminar_reporte.php', { id_reporte: id_reporte }, function(response) {
+                    alert(response);
+                    location.reload();
                 });
             }
         }

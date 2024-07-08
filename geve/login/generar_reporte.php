@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Obtener la lista de vehículos
-$vehiculos_sql = "SELECT id_vehiculo, identificador,nombre FROM Vehiculo";
+$vehiculos_sql = "SELECT id_vehiculo,patente FROM Vehiculo";
 $vehiculos_result = $conn->query($vehiculos_sql);
 
 // Obtener la lista de motivos
@@ -81,7 +81,7 @@ $conn->close();
             <label for="id_vehiculo">Seleccionar Vehículo:</label>
             <select id="id_vehiculo" name="id_vehiculo" required>
                 <?php while($row = $vehiculos_result->fetch_assoc()) { ?>
-                    <option value="<?php echo $row['id_vehiculo']; ?>"><?php echo $row['identificador']; ?> &nbsp; <?php echo $row['nombre']; ?></option>
+                    <option value="<?php echo $row['id_vehiculo']; ?>"><?php echo $row['patente']; ?> </option>
                 <?php } ?>
             </select><br>
             <label for="id_motivo">Seleccionar Causa:</label>

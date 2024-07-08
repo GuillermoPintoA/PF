@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nMotor = $_POST['nMotor'];
     $nCarroceria = $_POST['nCarroceria'];
     $id_modelo = $_POST['id_modelo'];
+    $id_comprado = $_POST['id_comprado'];
+
 
     // Verificar cambios
     $sql_check = "SELECT * FROM Vehiculo WHERE id_vehiculo = ?";
@@ -48,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         if (!empty($cambios) || isset($_POST['confirm'])) {
-            $sql = "UPDATE Vehiculo SET patente = ?, comprado = ?, fechaIngreso = ?, observacion = ?, vencimientoRevision = ?, vencimientoPermisoCirculacion = ?, ano = ?, nChasis = ?, nMotor = ?, nCarroceria = ?, id_modelo = ? WHERE id_vehiculo = ?";
+            $sql = "UPDATE Vehiculo SET patente = ?, id_comprado = ?, fechaIngreso = ?, observacion = ?, vencimientoRevision = ?, vencimientoPermisoCirculacion = ?, ano = ?, nChasis = ?, nMotor = ?, nCarroceria = ?, id_modelo = ? WHERE id_vehiculo = ?";
 
             if ($stmt = $conn->prepare($sql)) {
-                $stmt->bind_param("sissssisssii", $patente, $comprado, $fechaIngreso, $observacion, $vencimientoRevision, $vencimientoPermisoCirculacion, $ano, $nChasis, $nMotor, $nCarroceria, $id_modelo, $id_vehiculo);
+                $stmt->bind_param("sissssisssii", $patente, $id_comprado, $fechaIngreso, $observacion, $vencimientoRevision, $vencimientoPermisoCirculacion, $ano, $nChasis, $nMotor, $nCarroceria, $id_modelo, $id_vehiculo);
 
                 if ($stmt->execute()) {
                     // Manejar carga de archivos
@@ -140,6 +142,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-decoration: none;
             border-radius: 5px;
         }
+        .btn-accept {
+            display: block;
+            width: 100px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+            background-color:  #d73c3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
     
         .documents {
             margin-top: 20px;
@@ -167,6 +180,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-decoration: none;
             border-radius: 5px;
         }
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color:  #d73c3e;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color:  #d73c3e;
+        }
     </style>
     <script>
         function confirmSubmit() {
@@ -191,9 +240,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label for="patente">Patente:</label>
         <input type="text" name="patente" value="<?php echo $vehiculo['patente'] ?? ''; ?>" required pattern="[A-Z]{2}[0-9]{4}"><br>
         </tr>
-        <label for="comprado">Comprado:</label>
-        <input type="checkbox" name="comprado" <?php echo isset($vehiculo['comprado']) && $vehiculo['comprado'] ? 'checked' : ''; ?>><br>
-
+        <label for="id_comprado">Estado:</label>
+        <select name="id_comprado" required>
+            <?php
+            include 'db.php';
+            $sql_comprado = "SELECT id_comprado, tipo FROM comprado";
+            $result_comprado = $conn->query($sql_comprado);
+            while ($comprado = $result_comprado->fetch_assoc()) {
+                $selected = isset($vehiculo['id_comprado']) && $vehiculo['id_comprado'] == $comprado['id_comprado'] ? 'selected' : '';
+                echo "<option value='{$comprado['id_comprado']}' $selected>{$comprado['tipo']}</option>";
+            }
+            $conn->close();
+            ?>
+        </select>
         <label for="fechaIngreso">Fecha de Ingreso:</label>
         <input type="date" name="fechaIngreso" value="<?php echo $vehiculo['fechaIngreso'] ?? ''; ?>" required><br>
 
@@ -234,8 +293,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </table>
         <label for="archivo">Subir Documento (PDF o PNG):</label>
         <input type="file" name="archivo"><br>
+<br>
+<input type="submit"  value="Guardar Cambios">
 
-        <input type="submit" value="Guardar Cambios">
-    </form>
+</form>
+
+<br>
+    <a href="welcome.php" class="btn-back">Volver</a>
 </body>
 </html>

@@ -101,7 +101,7 @@ function formatearFecha($fecha) {
                                 <td> 
 
                                     <span class='action-icon view-icon' onclick='viewVehicle({$row['id_vehiculo']})'>&#128065;</span>
-                                    <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
+                                    <span class='action-icon view-icon' onclick='viewVehicleD({$row['id_vehiculo']})'>&#128065;</span>
                                     <span class='action-icon edit-icon' onclick='editVehicle({$row['id_vehiculo']})'>&#9998;</span>
                                     <span class='action-icon delete-icon' onclick='deleteVehicle({$row['id_vehiculo']})'>&#128465;</span>
                                    
@@ -197,6 +197,7 @@ function formatearFecha($fecha) {
 }
         function deleteVehicle1(id_vehiculo) {
             window.location.href = `eliminar_vehiculo1.php?id=${id_vehiculo}`;
+            
         }
         function editVehicle(id_vehiculo) {
             window.location.href = `editar_vehiculo.php?id=${id_vehiculo}`;
@@ -206,6 +207,9 @@ function formatearFecha($fecha) {
         }
         function viewVehicle(id_vehiculo) {
             window.location.href = `ver_vehiculo_detalle.php?id=${id_vehiculo}`;
+        }
+        function viewVehicleD(id_vehiculo) {
+            window.location.href = `ver_vehiculo_documento.php?id=${id_vehiculo}`;
         }
     </script>
 </body>

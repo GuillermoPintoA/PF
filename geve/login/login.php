@@ -23,7 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
         $_SESSION['username'] = $row['mail'];
         $_SESSION['nombre'] = $row['nombre'];
-        $_SESSION['apellido'] = $row['apellidoP'];
+        $_SESSION['apellidoP'] = $row['apellidoP'];
+        $_SESSION['apellidoM'] = $row['apellidoM'];
         $_SESSION['rut'] = $row['rut'];
         $_SESSION['dv_rut'] = $row['dv_rut'];
         $_SESSION['fechacreacion'] = $row['fechacreacion'];
